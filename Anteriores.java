@@ -2,16 +2,22 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package fitness;
+package com.mycompany.fitness2;
 
-import javax.swing.DefaultListModel;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import javax.swing.*;
+import java.io.File;
+import java.io.FileInputStream;
 /**
  *
  * @author Luna
  */
+import javax.swing.DefaultListModel;
+
 public class Anteriores extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Anteriores.class.getName());
 
     public Anteriores() {
@@ -19,14 +25,41 @@ public class Anteriores extends javax.swing.JFrame {
         setTitle("Entrenamientos Anteriores");
         setResizable(false);
         setLocationRelativeTo(null);
-
-        DefaultListModel<String> modelo = new DefaultListModel<>();
-        for (String dato : Entrenamiento.getListaAnteriores()) {
-            modelo.addElement(dato);
-        }
-        lista.setModel(modelo);
+        cargarDesdeExcel();
     }
 
+    private void cargarDesdeExcel() {
+        DefaultListModel<String> modelo = new DefaultListModel<>();
+        modelo.clear();
+
+        try {
+            File archivo = new File("entrenamientos.xlsx");
+            if (!archivo.exists()) {
+                modelo.addElement("No hay entrenamientos registrados.");
+            } else {
+                try (FileInputStream fis = new FileInputStream(archivo);
+                     Workbook workbook = new XSSFWorkbook(fis)) {
+
+                    Sheet sheet = workbook.getSheetAt(0);
+
+                    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                        Row fila = sheet.getRow(i);
+                        if (fila != null) {
+                            String ejercicio = fila.getCell(0).getStringCellValue();
+                            int pulsaciones = (int) fila.getCell(1).getNumericCellValue();
+                            String fecha = fila.getCell(2).getStringCellValue();
+                            modelo.addElement(ejercicio + " - " + pulsaciones + " bpm - " + fecha);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            modelo.addElement("Error al leer el archivo Excel.");
+        }
+
+        lista.setModel(modelo);
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -55,19 +88,21 @@ public class Anteriores extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 398, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 28, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 21, Short.MAX_VALUE))
         );
 
         jMenu1.setText("Opciones");
 
         itemInicio.setFont(new java.awt.Font("Source Sans Pro Light", 0, 14)); // NOI18N
-        itemInicio.setText("Incio");
+        itemInicio.setText("Inicio");
         itemInicio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 itemInicioActionPerformed(evt);
@@ -76,7 +111,7 @@ public class Anteriores extends javax.swing.JFrame {
         jMenu1.add(itemInicio);
 
         itemEntrenamiento.setFont(new java.awt.Font("Source Sans Pro Light", 0, 14)); // NOI18N
-        itemEntrenamiento.setText("Nuevo Entrenamiento");
+        itemEntrenamiento.setText("Nuevo entrenamiento");
         itemEntrenamiento.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 itemEntrenamientoActionPerformed(evt);
@@ -101,13 +136,13 @@ public class Anteriores extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap(19, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
